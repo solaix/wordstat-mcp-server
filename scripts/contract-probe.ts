@@ -317,6 +317,7 @@ async function executeCase(probe: ProbeCase, authorization: string): Promise<Pro
   const response = await fetch(`${API_BASE}${probe.endpoint}`, {
     method: "POST",
     headers: {
+      "accept-encoding": "identity",
       authorization,
       "content-type": "application/json",
       "user-agent": "wordstat-mcp-server-contract-probe/0.0.0",

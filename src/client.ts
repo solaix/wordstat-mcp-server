@@ -291,6 +291,7 @@ export class WordstatClient {
           const response = await this.fetchImpl(`${API_BASE}${endpoint}`, {
             method: "POST",
             headers: {
+              "accept-encoding": "identity",
               authorization: this.config.authorization,
               "content-type": "application/json",
               "user-agent": `wordstat-mcp-server/${VERSION}`,

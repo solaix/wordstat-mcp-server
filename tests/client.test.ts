@@ -33,6 +33,17 @@ test("client serializes protobuf int64 input and conditionally includes folderId
   assert.deepEqual(observedBody, { phrase: "test", numPhrases: "50", folderId: "folder" });
 });
 
+test("client requests uncompressed upstream responses", async () => {
+  let observedAcceptEncoding: string | null | undefined;
+  const client = new WordstatClient(config, async (_input, init) => {
+    observedAcceptEncoding = new Headers(init?.headers).get("accept-encoding");
+    return Response.json({ totalCount: "1", results: [], associations: [] });
+  });
+
+  await client.top({ phrase: "test", numPhrases: 1 }, new AbortController().signal);
+  assert.equal(observedAcceptEncoding, "identity");
+});
+
 test("client reports attempts and preserves decoded numeric precision contract", async () => {
   const fetchMock: typeof fetch = async () =>
     Response.json({

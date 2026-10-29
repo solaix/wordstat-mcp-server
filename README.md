@@ -3,8 +3,7 @@
 Неофициальный open-source MCP-сервер, который даёт AI-агентам типизированный read-only доступ ко
 всем стандартным методам [Yandex Wordstat API](https://aistudio.yandex.ru/ru/docs/search-api/concepts/wordstat).
 
-> Статус: `0.1.0`, активная разработка. npm-пакет ещё не опубликован, поэтому команды с
-> `wordstat-mcp-server@latest` заработают после первого релиза.
+> Статус: `0.1.0`, первый публичный релиз.
 
 [English](#english)
 
@@ -23,7 +22,7 @@
 
 ## Требования и доступ
 
-- Node.js `20.3` или новее;
+- Node.js `22.23.4+`, `24.22.1+` или `26.12.1+` в соответствующей LTS-линейке;
 - API-ключ со scope `yc.search-api.execute` **или** IAM-токен;
 - роль `search-api.webSearch.user` на нужный каталог Yandex Cloud.
 
@@ -312,8 +311,7 @@ MIT
 Unofficial open-source MCP server that gives AI agents typed, read-only access to every standard
 [Yandex Wordstat API](https://aistudio.yandex.ru/en/docs/search-api/concepts/wordstat) method.
 
-> Status: `0.1.0`, under active development. The npm package has not been published yet, so commands
-> using `wordstat-mcp-server@latest` will work after the first release.
+> Status: `0.1.0`, first public release.
 
 ## Features
 
@@ -329,7 +327,7 @@ All tools are read-only and idempotent. Wordstat requests are external API calls
 
 ## Requirements and credentials
 
-- Node.js `20.3` or newer;
+- Node.js `22.23.4+`, `24.22.1+`, or `26.12.1+` in the corresponding LTS line;
 - either an API key with the `yc.search-api.execute` scope or an IAM token;
 - the `search-api.webSearch.user` role on the target Yandex Cloud folder.
 

@@ -1,7 +1,6 @@
 {
   "name": "wordstat-mcp-server",
   "version": "0.1.0",
-  "private": true,
   "mcpName": "io.github.solaix/wordstat-mcp-server",
   "description": "Unofficial MCP server for Yandex Wordstat",
   "author": {
@@ -25,7 +24,7 @@
   ],
   "type": "module",
   "engines": {
-    "node": ">=20.3.0"
+    "node": "^22.23.4 || ^24.22.1 || ^26.12.1"
   },
   "bin": {
     "wordstat-mcp-server": "dist/cli.js"
