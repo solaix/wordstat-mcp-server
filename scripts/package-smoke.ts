@@ -31,10 +31,6 @@ interface PackResult {
   filename: string;
 }
 
-function npmCommand(): string {
-  return process.platform === "win32" ? "npm.cmd" : "npm";
-}
-
 function sanitizedEnvironment(npmCacheDirectory?: string): Record<string, string> {
   return {
     ...Object.fromEntries(
@@ -109,6 +105,14 @@ function runCommand(
       );
     });
   });
+}
+
+function runNpm(args: string[], cwd: string, npmCacheDirectory: string): Promise<CommandResult> {
+  const npmExecPath = process.env.npm_execpath;
+  if (!npmExecPath) {
+    throw new Error("npm_execpath is unavailable; run this smoke through npm run smoke:package");
+  }
+  return runCommand(process.execPath, [npmExecPath, ...args], cwd, npmCacheDirectory);
 }
 
 function parsePackResult(stdout: string): PackResult {
@@ -215,8 +219,7 @@ async function main(): Promise<void> {
   try {
     await mkdir(packDirectory);
     await mkdir(installDirectory);
-    const packed = await runCommand(
-      npmCommand(),
+    const packed = await runNpm(
       ["pack", "--json", "--pack-destination", packDirectory],
       projectDirectory,
       npmCacheDirectory,
@@ -230,8 +233,7 @@ async function main(): Promise<void> {
       JSON.stringify({ name: "wordstat-package-smoke", private: true }),
       { encoding: "utf8", mode: 0o600 },
     );
-    await runCommand(
-      npmCommand(),
+    await runNpm(
       [
         "install",
         "--ignore-scripts",
