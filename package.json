@@ -4,6 +4,10 @@
   "private": true,
   "mcpName": "io.github.solaix/wordstat-mcp-server",
   "description": "Unofficial MCP server for Yandex Wordstat",
+  "author": {
+    "name": "solaix",
+    "url": "https://github.com/solaix"
+  },
   "license": "MIT",
   "repository": {
     "type": "git",
