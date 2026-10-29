@@ -1,0 +1,42 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.solaix/wordstat-mcp-server",
+  "title": "Yandex Wordstat MCP Server",
+  "description": "Unofficial MCP server providing agents with access to the Yandex Wordstat API.",
+  "repository": {
+    "url": "https://github.com/solaix/wordstat-mcp-server",
+    "source": "github"
+  },
+  "version": "0.1.0",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "wordstat-mcp-server",
+      "version": "0.1.0",
+      "runtimeHint": "npx",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "YANDEX_WORDSTAT_API_KEY",
+          "description": "Yandex Cloud API key. Set this or YANDEX_WORDSTAT_IAM_TOKEN.",
+          "isRequired": false,
+          "isSecret": true
+        },
+        {
+          "name": "YANDEX_WORDSTAT_IAM_TOKEN",
+          "description": "Yandex Cloud IAM token. Set this or YANDEX_WORDSTAT_API_KEY.",
+          "isRequired": false,
+          "isSecret": true
+        },
+        {
+          "name": "YANDEX_WORDSTAT_FOLDER_ID",
+          "description": "Folder ID required for user or federated-user IAM tokens.",
+          "isRequired": false,
+          "isSecret": false
+        }
+      ]
+    }
+  ]
+}

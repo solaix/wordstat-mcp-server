@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.env
+contract-results/
+.internal/
+*.tgz
+*.log
