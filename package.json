@@ -40,7 +40,7 @@
     "format:check": "prettier --check .",
     "check": "npm run typecheck && npm run lint && npm run format:check",
     "pretest": "npm run build",
-    "test": "node --import tsx --test tests/*.test.ts",
+    "test": "node --import tsx scripts/run-tests.ts",
     "contract:probe": "node --import tsx scripts/contract-probe.ts",
     "smoke:live:mcp": "node --import tsx scripts/live-mcp-smoke.ts",
     "smoke:package": "node --import tsx scripts/package-smoke.ts"
