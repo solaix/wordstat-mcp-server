@@ -2,7 +2,8 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.solaix/wordstat-mcp-server",
   "title": "Yandex Wordstat MCP Server",
-  "description": "Unofficial MCP server providing agents with access to the Yandex Wordstat API.",
+  "description": "Unofficial Yandex Wordstat MCP server for SEO keyword research, trends, and regional interest.",
+  "websiteUrl": "https://github.com/solaix/wordstat-mcp-server#readme",
   "repository": {
     "url": "https://github.com/solaix/wordstat-mcp-server",
     "source": "github"
@@ -20,20 +21,80 @@
       "environmentVariables": [
         {
           "name": "YANDEX_WORDSTAT_API_KEY",
-          "description": "Yandex Cloud API key. Set this or YANDEX_WORDSTAT_IAM_TOKEN.",
+          "description": "Yandex Cloud API key. Set exactly one credential: this or YANDEX_WORDSTAT_IAM_TOKEN.",
           "isRequired": false,
+          "format": "string",
           "isSecret": true
         },
         {
           "name": "YANDEX_WORDSTAT_IAM_TOKEN",
-          "description": "Yandex Cloud IAM token. Set this or YANDEX_WORDSTAT_API_KEY.",
+          "description": "Yandex Cloud IAM token. Set exactly one credential: this or YANDEX_WORDSTAT_API_KEY.",
           "isRequired": false,
+          "format": "string",
           "isSecret": true
         },
         {
           "name": "YANDEX_WORDSTAT_FOLDER_ID",
           "description": "Folder ID required for user or federated-user IAM tokens.",
           "isRequired": false,
+          "format": "string",
+          "isSecret": false
+        },
+        {
+          "name": "YANDEX_WORDSTAT_TIMEOUT_MS",
+          "description": "Request timeout in milliseconds (1-300000). Server default: 30000.",
+          "isRequired": false,
+          "format": "number",
+          "default": "30000",
+          "isSecret": false
+        },
+        {
+          "name": "YANDEX_WORDSTAT_MAX_RETRIES",
+          "description": "Maximum retries for transient failures (0-10). Server default: 2.",
+          "isRequired": false,
+          "format": "number",
+          "default": "2",
+          "isSecret": false
+        },
+        {
+          "name": "YANDEX_WORDSTAT_MAX_RPS",
+          "description": "Maximum requests started per second (1-10000). Server default: 8.",
+          "isRequired": false,
+          "format": "number",
+          "default": "8",
+          "isSecret": false
+        },
+        {
+          "name": "YANDEX_WORDSTAT_MAX_RPH",
+          "description": "Maximum logical requests per hour (0-1000000); 0 disables this limit. Server default: 100.",
+          "isRequired": false,
+          "format": "number",
+          "default": "100",
+          "isSecret": false
+        },
+        {
+          "name": "YANDEX_WORDSTAT_MAX_CONCURRENCY",
+          "description": "Maximum concurrent requests (1-100). Server default: 4.",
+          "isRequired": false,
+          "format": "number",
+          "default": "4",
+          "isSecret": false
+        },
+        {
+          "name": "YANDEX_WORDSTAT_REGIONS_CACHE_TTL_MS",
+          "description": "Regions-tree cache lifetime in milliseconds (0-2592000000). Server default: 86400000.",
+          "isRequired": false,
+          "format": "number",
+          "default": "86400000",
+          "isSecret": false
+        },
+        {
+          "name": "YANDEX_WORDSTAT_LOG_LEVEL",
+          "description": "Diagnostic log level. Server default: error.",
+          "isRequired": false,
+          "format": "string",
+          "default": "error",
+          "choices": ["silent", "error", "warn", "info", "debug"],
           "isSecret": false
         }
       ]
