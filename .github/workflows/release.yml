@@ -1,0 +1,43 @@
+name: Stage npm release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  stage:
+    name: Verify and stage npm package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+      - name: Verify tag matches package version
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: >-
+          node --input-type=module -e
+          "import pkg from './package.json' with { type: 'json' };
+          const expected = 'v' + pkg.version;
+          if (process.env.RELEASE_TAG !== expected) {
+            console.error('Expected tag ' + expected + ', received ' + process.env.RELEASE_TAG);
+            process.exit(1);
+          }"
+      - run: npm ci
+      - run: npm run check
+      - run: npm test
+      - run: npm audit --audit-level=moderate
+      - run: npm pack --dry-run
+      - run: npm run smoke:package
+      - name: Stage package on npm
+        run: npm stage publish --access public
