@@ -33,6 +33,37 @@ test("client serializes protobuf int64 input and conditionally includes folderId
   assert.deepEqual(observedBody, { phrase: "test", numPhrases: "50", folderId: "folder" });
 });
 
+test("client normalizes omitted protobuf defaults from successful Wordstat responses", async () => {
+  const client = new WordstatClient(config, async (input) => {
+    const url = input instanceof Request ? input.url : input.toString();
+    if (url.endsWith("/topRequests")) return Response.json({});
+    if (url.endsWith("/dynamics")) {
+      return Response.json({ results: [{ date: "2026-10-07T00:00:00Z" }] });
+    }
+    if (url.endsWith("/regions")) return Response.json({});
+    throw new Error(`Unexpected test URL: ${url}`);
+  });
+
+  const signal = new AbortController().signal;
+  const top = await client.top({ phrase: "no demand", numPhrases: 1 }, signal);
+  const dynamics = await client.dynamics(
+    {
+      phrase: "no demand",
+      period: "PERIOD_DAILY",
+      fromDate: "2026-09-30T00:00:00Z",
+      toDate: "2026-10-07T23:59:59Z",
+    },
+    signal,
+  );
+  const regions = await client.regions({ phrase: "no demand", region: "REGION_ALL" }, signal);
+
+  assert.deepEqual(top.data, { totalCount: "0", results: [], associations: [] });
+  assert.deepEqual(dynamics.data, {
+    results: [{ date: "2026-10-07T00:00:00Z", count: "0", share: 0 }],
+  });
+  assert.deepEqual(regions.data, { results: [] });
+});
+
 test("client requests uncompressed upstream responses", async () => {
   let observedAcceptEncoding: string | null | undefined;
   const client = new WordstatClient(config, async (_input, init) => {
@@ -131,6 +162,34 @@ test("client classifies authentication and request validation errors", async () 
         error.httpAttempts === 1,
     );
   }
+});
+
+test("dynamics HTTP 400 suggests an earlier range and is not retried", async () => {
+  let calls = 0;
+  const client = new WordstatClient({ ...config, maxRetries: 2 }, async () => {
+    calls += 1;
+    return new Response("rejected", { status: 400 });
+  });
+
+  await assert.rejects(
+    client.dynamics(
+      {
+        phrase: "test",
+        period: "PERIOD_DAILY",
+        fromDate: "2026-10-08T00:00:00Z",
+        toDate: "2026-10-08T23:59:59Z",
+      },
+      new AbortController().signal,
+    ),
+    (error: unknown) =>
+      error instanceof WordstatError &&
+      error.code === "VALIDATION_ERROR" &&
+      error.status === 400 &&
+      error.retryable === false &&
+      error.httpAttempts === 1 &&
+      /earlier completed range/.test(error.message),
+  );
+  assert.equal(calls, 1);
 });
 
 test("Retry-After above 30 seconds is returned without holding the call", async () => {

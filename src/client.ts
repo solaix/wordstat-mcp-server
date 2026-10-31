@@ -162,7 +162,11 @@ function parseRetryAfter(value: string | null): number | undefined {
   return Math.max(0, Math.ceil((date - Date.now()) / 1_000));
 }
 
-function classifyStatus(status: number, retryAfterSeconds?: number): WordstatError {
+function classifyStatus(
+  status: number,
+  endpoint: string,
+  retryAfterSeconds?: number,
+): WordstatError {
   if (status === 401) {
     return new WordstatError("AUTHENTICATION_ERROR", "Yandex rejected the configured credential", {
       status,
@@ -187,6 +191,13 @@ function classifyStatus(status: number, retryAfterSeconds?: number): WordstatErr
       status,
       retryable: true,
     });
+  }
+  if (status === 400 && endpoint === "/dynamics") {
+    return new WordstatError(
+      "VALIDATION_ERROR",
+      "Yandex Wordstat rejected the dynamics request (HTTP 400); verify the date range and try an earlier completed range if recent data is not published yet",
+      { status },
+    );
   }
   return new WordstatError(
     "VALIDATION_ERROR",
@@ -310,6 +321,7 @@ export class WordstatClient {
             await readBodyLimited(response, MAX_ERROR_BODY, requestSignal).catch(() => "");
             throw classifyStatus(
               response.status,
+              endpoint,
               parseRetryAfter(response.headers.get("retry-after")),
             );
           }
