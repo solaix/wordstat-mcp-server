@@ -3,7 +3,7 @@
 Неофициальный open-source MCP-сервер, который даёт AI-агентам типизированный read-only доступ ко
 всем стандартным методам [Yandex Wordstat API](https://aistudio.yandex.ru/ru/docs/search-api/concepts/wordstat).
 
-> Статус: `0.1.0`, первый публичный релиз.
+> Статус: `0.1.1`, исправление совместимости с пропущенными protobuf-default значениями Wordstat API.
 
 [English](#english)
 
@@ -153,6 +153,11 @@ Hermes передаёт stdio-серверу только явно перечи�
 диапазон от 3 недель или месяцев до 5 лет; самая ранняя доступная история начинается с января 2018 года.
 Неделя задаётся от понедельника до воскресенья, месяц — от первого до последнего дня месяца.
 
+Последние календарные точки могут быть ещё не опубликованы. API возвращает только доступную часть
+диапазона, а диапазон целиком после последней опубликованной точки может получить HTTP 400. В таком
+случае попробуйте более ранние даты; сервер не сдвигает явно заданный диапазон и не делает дополнительный
+платный запрос автоматически.
+
 Для дневной динамики разрешены операторы `-`, `!`, `+`, кавычки, `[]`, `()` и `|`; для недельной и
 месячной — только `+`. Явные неподдерживаемые операторы для недельной и месячной детализации
 отклоняются до платного API-вызова.
@@ -260,15 +265,15 @@ Hermes передаёт stdio-серверу только явно перечи�
 Ошибка инструмента содержит `code`, безопасное `message`, `retryable`, а при наличии — `http_status`,
 `retry_after_seconds` и `http_attempts`.
 
-| Симптом                           | Что проверить                                                                  |
-| --------------------------------- | ------------------------------------------------------------------------------ |
-| `CONFIGURATION_ERROR`             | Задан ровно один credential; числа находятся в разрешённых диапазонах          |
-| HTTP 400 / `VALIDATION_ERROR`     | Фраза, даты, период, операторы, ID регионов и folder ID                        |
-| HTTP 401 / `AUTHENTICATION_ERROR` | Credential действителен и MCP-клиент был перезапущен после изменения окружения |
-| HTTP 403 / `AUTHORIZATION_ERROR`  | Роль `search-api.webSearch.user` назначена на нужный каталог                   |
-| HTTP 429 / `RATE_LIMITED`         | Уменьшите RPS/параллельность или дождитесь `retry_after_seconds`               |
-| `TIMEOUT` / `NETWORK_ERROR`       | Сеть, доступ к API и `YANDEX_WORDSTAT_TIMEOUT_MS`                              |
-| Пустая динамика                   | Запрошен завершённый доступный период и корректные региональные фильтры        |
+| Симптом                           | Что проверить                                                                                          |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `CONFIGURATION_ERROR`             | Задан ровно один credential; числа находятся в разрешённых диапазонах                                  |
+| HTTP 400 / `VALIDATION_ERROR`     | Фраза, даты, период, операторы, ID регионов и folder ID; для dynamics попробуйте более ранний диапазон |
+| HTTP 401 / `AUTHENTICATION_ERROR` | Credential действителен и MCP-клиент был перезапущен после изменения окружения                         |
+| HTTP 403 / `AUTHORIZATION_ERROR`  | Роль `search-api.webSearch.user` назначена на нужный каталог                                           |
+| HTTP 429 / `RATE_LIMITED`         | Уменьшите RPS/параллельность или дождитесь `retry_after_seconds`                                       |
+| `TIMEOUT` / `NETWORK_ERROR`       | Сеть, доступ к API и `YANDEX_WORDSTAT_TIMEOUT_MS`                                                      |
+| Пустая динамика                   | Запрошен завершённый доступный период и корректные региональные фильтры                                |
 
 Логи пишутся только в `stderr`. Для диагностики временно задайте `YANDEX_WORDSTAT_LOG_LEVEL=debug`;
 credentials и Authorization-заголовок сервер не логирует.
@@ -311,7 +316,7 @@ MIT
 Unofficial open-source MCP server that gives AI agents typed, read-only access to every standard
 [Yandex Wordstat API](https://aistudio.yandex.ru/en/docs/search-api/concepts/wordstat) method.
 
-> Status: `0.1.0`, first public release.
+> Status: `0.1.1`, a compatibility fix for omitted protobuf default values in the Wordstat API.
 
 ## Features
 
@@ -448,6 +453,10 @@ A daily range cannot exceed 60 days. For weekly and monthly detail, Wordstat doc
 3 weeks or months up to 5 years, with the earliest available history starting in January 2018. Weeks
 run Monday through Sunday, and months from their first through their last calendar day.
 
+Recent calendar points may not be published yet. The API returns only the available part of a range,
+while a range entirely after the latest published point may receive HTTP 400. Try earlier dates in that
+case; the server does not shift explicit bounds or make an additional billable request automatically.
+
 Daily dynamics supports `-`, `!`, `+`, quotes, `[]`, `()`, and `|`; weekly and monthly dynamics support
 only `+`. Explicitly unsupported operators for weekly and monthly detail are rejected before a
 billable API call.
@@ -548,15 +557,15 @@ unit of the local hourly budget.
 Tool errors return `code`, a safe `message`, `retryable`, and, when available, `http_status`,
 `retry_after_seconds`, and `http_attempts`.
 
-| Symptom                           | Check                                                                 |
-| --------------------------------- | --------------------------------------------------------------------- |
-| `CONFIGURATION_ERROR`             | Exactly one credential is present and numeric settings are in range   |
-| HTTP 400 / `VALIDATION_ERROR`     | Phrase, dates, period, operators, region IDs, and folder ID           |
-| HTTP 401 / `AUTHENTICATION_ERROR` | Credential validity and whether the client inherited the environment  |
-| HTTP 403 / `AUTHORIZATION_ERROR`  | `search-api.webSearch.user` is granted on the correct folder          |
-| HTTP 429 / `RATE_LIMITED`         | Reduce RPS/concurrency or wait for `retry_after_seconds`              |
-| `TIMEOUT` / `NETWORK_ERROR`       | Connectivity, API reachability, and `YANDEX_WORDSTAT_TIMEOUT_MS`      |
-| Empty dynamics                    | A complete supported period and valid regional filters were requested |
+| Symptom                           | Check                                                                                      |
+| --------------------------------- | ------------------------------------------------------------------------------------------ |
+| `CONFIGURATION_ERROR`             | Exactly one credential is present and numeric settings are in range                        |
+| HTTP 400 / `VALIDATION_ERROR`     | Phrase, dates, period, operators, region IDs, and folder ID; try an earlier dynamics range |
+| HTTP 401 / `AUTHENTICATION_ERROR` | Credential validity and whether the client inherited the environment                       |
+| HTTP 403 / `AUTHORIZATION_ERROR`  | `search-api.webSearch.user` is granted on the correct folder                               |
+| HTTP 429 / `RATE_LIMITED`         | Reduce RPS/concurrency or wait for `retry_after_seconds`                                   |
+| `TIMEOUT` / `NETWORK_ERROR`       | Connectivity, API reachability, and `YANDEX_WORDSTAT_TIMEOUT_MS`                           |
+| Empty dynamics                    | A complete supported period and valid regional filters were requested                      |
 
 Logs go to `stderr` only. Temporarily set `YANDEX_WORDSTAT_LOG_LEVEL=debug` for diagnostics. Credentials
 and the Authorization header are never logged.

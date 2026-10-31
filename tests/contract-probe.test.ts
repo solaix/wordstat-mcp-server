@@ -20,7 +20,7 @@ test("dry run is the default and live execution requires an explicit flag", () =
   assert.equal(parseArgs(["--confirm-live"]).confirmLive, true);
 });
 
-test("probe cases use complete daily, weekly and monthly boundaries", () => {
+test("probe cases use lag-tolerant daily and complete weekly and monthly boundaries", () => {
   const cases = buildProbeCases(new Date("2026-09-28T17:00:00Z"), "test phrase", "folder");
   const byName = Object.fromEntries(cases.map((item) => [item.name, item]));
 
@@ -28,8 +28,8 @@ test("probe cases use complete daily, weekly and monthly boundaries", () => {
     phrase: "test phrase",
     devices: ["DEVICE_ALL"],
     period: "PERIOD_DAILY",
-    fromDate: "2026-09-21T00:00:00Z",
-    toDate: "2026-09-27T00:00:00Z",
+    fromDate: "2026-08-23T00:00:00Z",
+    toDate: "2026-08-29T00:00:00Z",
     folderId: "folder",
   });
   assert.equal(byName["dynamics-weekly"]?.body.fromDate, "2026-08-31T00:00:00Z");
