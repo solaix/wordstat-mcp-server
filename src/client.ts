@@ -195,7 +195,7 @@ function classifyStatus(
   if (status === 400 && endpoint === "/dynamics") {
     return new WordstatError(
       "VALIDATION_ERROR",
-      "Yandex Wordstat rejected the dynamics request (HTTP 400); verify the date range and try an earlier completed range if recent data is not published yet",
+      "Yandex Wordstat rejected the dynamics request (HTTP 400); check the date range, period boundaries, region IDs, operators, folder ID, and other parameters. If the range is recent, try an earlier completed range because recent data may not be published yet",
       { status },
     );
   }

@@ -164,7 +164,7 @@ test("client classifies authentication and request validation errors", async () 
   }
 });
 
-test("dynamics HTTP 400 suggests an earlier range and is not retried", async () => {
+test("dynamics HTTP 400 gives neutral diagnostics and is not retried", async () => {
   let calls = 0;
   const client = new WordstatClient({ ...config, maxRetries: 2 }, async () => {
     calls += 1;
@@ -187,6 +187,10 @@ test("dynamics HTTP 400 suggests an earlier range and is not retried", async () 
       error.status === 400 &&
       error.retryable === false &&
       error.httpAttempts === 1 &&
+      /period boundaries/.test(error.message) &&
+      /region IDs/.test(error.message) &&
+      /operators/.test(error.message) &&
+      /folder ID/.test(error.message) &&
       /earlier completed range/.test(error.message),
   );
   assert.equal(calls, 1);

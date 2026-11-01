@@ -153,10 +153,11 @@ Hermes передаёт stdio-серверу только явно перечи�
 диапазон от 3 недель или месяцев до 5 лет; самая ранняя доступная история начинается с января 2018 года.
 Неделя задаётся от понедельника до воскресенья, месяц — от первого до последнего дня месяца.
 
-Последние календарные точки могут быть ещё не опубликованы. API возвращает только доступную часть
-диапазона, а диапазон целиком после последней опубликованной точки может получить HTTP 400. В таком
-случае попробуйте более ранние даты; сервер не сдвигает явно заданный диапазон и не делает дополнительный
-платный запрос автоматически.
+Live-проверки показали наблюдаемое, но не документированное поведение: последние календарные точки могут
+быть ещё не опубликованы, API возвращает только доступную часть пересекающегося диапазона, а диапазон
+целиком после последней опубликованной точки может получить HTTP 400. Поскольку HTTP 400 может иметь и
+другие причины, проверьте все параметры запроса; для недавнего диапазона попробуйте более ранние даты.
+Сервер не сдвигает явно заданный диапазон и не делает дополнительный платный запрос автоматически.
 
 Для дневной динамики разрешены операторы `-`, `!`, `+`, кавычки, `[]`, `()` и `|`; для недельной и
 месячной — только `+`. Явные неподдерживаемые операторы для недельной и месячной детализации
@@ -453,9 +454,11 @@ A daily range cannot exceed 60 days. For weekly and monthly detail, Wordstat doc
 3 weeks or months up to 5 years, with the earliest available history starting in January 2018. Weeks
 run Monday through Sunday, and months from their first through their last calendar day.
 
-Recent calendar points may not be published yet. The API returns only the available part of a range,
-while a range entirely after the latest published point may receive HTTP 400. Try earlier dates in that
-case; the server does not shift explicit bounds or make an additional billable request automatically.
+Live probes revealed observed but undocumented behavior: recent calendar points may not be published
+yet, the API returns only the available part of an overlapping range, and a range entirely after the
+latest published point may receive HTTP 400. Because HTTP 400 can have other causes, verify every request
+parameter; for a recent range, try earlier dates. The server does not shift explicit bounds or make an
+additional billable request automatically.
 
 Daily dynamics supports `-`, `!`, `+`, quotes, `[]`, `()`, and `|`; weekly and monthly dynamics support
 only `+`. Explicitly unsupported operators for weekly and monthly detail are rejected before a
