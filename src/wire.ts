@@ -29,34 +29,38 @@ const finiteWireNumber = z.union([z.number().finite(), z.string()]).transform((v
 
 export const phraseInfoSchema = z.object({
   phrase: z.string().max(1_000),
-  count: int64String,
+  count: int64String.default("0"),
 });
 
 export const topResponseSchema = z.object({
-  totalCount: int64String,
-  results: z.array(phraseInfoSchema),
-  associations: z.array(phraseInfoSchema),
+  totalCount: int64String.default("0"),
+  results: z.array(phraseInfoSchema).default([]),
+  associations: z.array(phraseInfoSchema).default([]),
 });
 
 export const dynamicsResponseSchema = z.object({
-  results: z.array(
-    z.object({
-      date: z.string().max(64),
-      count: int64String,
-      share: finiteWireNumber,
-    }),
-  ),
+  results: z
+    .array(
+      z.object({
+        date: z.string().max(64),
+        count: int64String.default("0"),
+        share: finiteWireNumber.default(0),
+      }),
+    )
+    .default([]),
 });
 
 export const regionsResponseSchema = z.object({
-  results: z.array(
-    z.object({
-      region: z.string().min(1).max(128),
-      count: int64String,
-      share: finiteWireNumber,
-      affinityIndex: finiteWireNumber,
-    }),
-  ),
+  results: z
+    .array(
+      z.object({
+        region: z.string().min(1).max(128),
+        count: int64String.default("0"),
+        share: finiteWireNumber.default(0),
+        affinityIndex: finiteWireNumber.default(0),
+      }),
+    )
+    .default([]),
 });
 
 export interface RegionNode {
@@ -74,7 +78,7 @@ export const regionNodeSchema: z.ZodType<RegionNode> = z.lazy(() =>
 );
 
 export const regionsTreeResponseSchema = z.object({
-  regions: z.array(regionNodeSchema),
+  regions: z.array(regionNodeSchema).default([]),
 });
 
 export type TopResponse = z.output<typeof topResponseSchema>;

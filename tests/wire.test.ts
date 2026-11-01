@@ -1,7 +1,47 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { dynamicsResponseSchema, regionsResponseSchema, topResponseSchema } from "../src/wire.js";
+import {
+  dynamicsResponseSchema,
+  regionsResponseSchema,
+  regionsTreeResponseSchema,
+  topResponseSchema,
+} from "../src/wire.js";
+
+test("omitted protobuf defaults are normalized without weakening identity fields", () => {
+  assert.deepEqual(topResponseSchema.parse({}), {
+    totalCount: "0",
+    results: [],
+    associations: [],
+  });
+  assert.deepEqual(topResponseSchema.parse({ results: [{ phrase: "zero demand" }] }).results, [
+    { phrase: "zero demand", count: "0" },
+  ]);
+  assert.deepEqual(dynamicsResponseSchema.parse({ results: [{ date: "2026-10-07T00:00:00Z" }] }), {
+    results: [{ date: "2026-10-07T00:00:00Z", count: "0", share: 0 }],
+  });
+  assert.deepEqual(regionsResponseSchema.parse({}), { results: [] });
+  assert.deepEqual(regionsResponseSchema.parse({ results: [{ region: "213" }] }), {
+    results: [{ region: "213", count: "0", share: 0, affinityIndex: 0 }],
+  });
+  assert.deepEqual(regionsTreeResponseSchema.parse({}), { regions: [] });
+  assert.deepEqual(regionsTreeResponseSchema.parse({ regions: [{ id: "213", label: "Moscow" }] }), {
+    regions: [{ id: "213", label: "Moscow", children: [] }],
+  });
+
+  assert.throws(() => dynamicsResponseSchema.parse({ results: [{ count: "0", share: 0 }] }));
+  assert.throws(() => regionsResponseSchema.parse({ results: [{ count: "0" }] }));
+});
+
+test("explicit null and invalid protobuf defaults remain contract errors", () => {
+  assert.throws(() => topResponseSchema.parse({ totalCount: null }));
+  assert.throws(() => topResponseSchema.parse({ results: null }));
+  assert.throws(() =>
+    dynamicsResponseSchema.parse({ results: [{ date: "2026-10-07", count: null }] }),
+  );
+  assert.throws(() => regionsResponseSchema.parse({ results: [{ region: "213", share: null }] }));
+  assert.throws(() => regionsTreeResponseSchema.parse({ regions: null }));
+});
 
 test("confirmed int64 fields remain strings", () => {
   const parsed = topResponseSchema.parse({

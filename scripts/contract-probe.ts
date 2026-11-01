@@ -76,7 +76,9 @@ function dateRanges(now: Date): {
   monthly: { fromDate: string; toDate: string };
 } {
   const today = atUtcMidnight(now);
-  const yesterday = addUtcDays(today, -1);
+  // Daily Wordstat points can be published weeks after their calendar date.
+  // Keep the probe inside the observed 60-day window while leaving a 30-day lag buffer.
+  const dailyTo = addUtcDays(today, -30);
   const mondayOffset = (today.getUTCDay() + 6) % 7;
   const currentMonday = addUtcDays(today, -mondayOffset);
   const previousSunday = addUtcDays(currentMonday, -1);
@@ -84,8 +86,8 @@ function dateRanges(now: Date): {
 
   return {
     daily: {
-      fromDate: rfc3339(addUtcDays(yesterday, -6)),
-      toDate: rfc3339(yesterday),
+      fromDate: rfc3339(addUtcDays(dailyTo, -6)),
+      toDate: rfc3339(dailyTo),
     },
     weekly: {
       fromDate: rfc3339(addUtcDays(currentMonday, -28)),

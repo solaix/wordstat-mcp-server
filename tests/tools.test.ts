@@ -68,6 +68,74 @@ function structured(result: Awaited<ReturnType<Client["callTool"]>>): Record<str
   return result.structuredContent as Record<string, unknown>;
 }
 
+test("tools expose normalized zero-demand values through their output schemas", async () => {
+  const api = fakeClient({
+    async top() {
+      return {
+        data: { totalCount: "0", results: [], associations: [] },
+        metadata: { ...metadata, billableCallsEstimate: 1 },
+      };
+    },
+    async dynamics() {
+      return {
+        data: {
+          results: [{ date: "2026-10-07T00:00:00Z", count: "0", share: 0 }],
+        },
+        metadata: { ...metadata, billableCallsEstimate: 1 },
+      };
+    },
+    async regions() {
+      return {
+        data: {
+          results: [{ region: "213", count: "0", share: 0, affinityIndex: 0 }],
+        },
+        metadata: { ...metadata, billableCallsEstimate: 1 },
+      };
+    },
+  });
+
+  await withClient(api, async (client) => {
+    const top = structured(
+      await client.callTool({
+        name: "wordstat_top_requests",
+        arguments: { phrase: "no demand", num_phrases: 1 },
+      }),
+    );
+    assert.equal(top.total_count, "0");
+    assert.deepEqual(top.results, []);
+    assert.deepEqual(top.associations, []);
+
+    const dynamics = structured(
+      await client.callTool({
+        name: "wordstat_dynamics",
+        arguments: {
+          phrase: "no demand",
+          period: "daily",
+          from_date: "2026-10-07",
+          to_date: "2026-10-07",
+        },
+      }),
+    );
+    assert.deepEqual(dynamics.results, [{ date: "2026-10-07T00:00:00Z", count: "0", share: 0 }]);
+
+    const regions = structured(
+      await client.callTool({
+        name: "wordstat_regions",
+        arguments: { phrase: "no demand", resolve_names: false },
+      }),
+    );
+    assert.deepEqual(regions.results, [
+      {
+        region_id: "213",
+        region_name: null,
+        count: "0",
+        share: 0,
+        affinity_index: 0,
+      },
+    ]);
+  });
+});
+
 test("regions tree cache reports miss, hit, stale fallback and refresh cooldown", async () => {
   let now = 100_000;
   let calls = 0;

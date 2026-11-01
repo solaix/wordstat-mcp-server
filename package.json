@@ -1,6 +1,6 @@
 {
   "name": "wordstat-mcp-server",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "mcpName": "io.github.solaix/wordstat-mcp-server",
   "description": "Unofficial MCP server for Yandex Wordstat",
   "author": {
@@ -61,6 +61,9 @@
   "dependencies": {
     "@modelcontextprotocol/server": "2.4.0",
     "zod": "4.6.7"
+  },
+  "overrides": {
+    "minimatch": "11.0.3"
   },
   "allowScripts": {
     "esbuild@0.28.2": true,
